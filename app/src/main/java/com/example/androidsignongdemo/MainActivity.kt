@@ -11,8 +11,11 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
+import com.example.androidsignongdemo.client.example.interfaces.HashData
 import com.example.androidsignongdemo.util.*
 import org.apache.xml.security.utils.resolver.ResourceResolver
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import ru.CryptoPro.ACSPClientApp.util.AlgorithmSelector
 import ru.CryptoPro.AdES.AdESConfig
 import ru.CryptoPro.JCPxml.XmlInit
 import ru.CryptoPro.JCPxml.dsig.internal.dom.XMLDSigRI
@@ -29,6 +32,7 @@ import ru.cprocsp.ACSP.tools.wait_task.OnTaskCompleteListener
 import ru.cprocsp.ACSP.tools.wait_task.Task
 import ru.cprocsp.ACSP.util.PermissionHelper
 import java.io.File
+import java.io.FileInputStream
 import java.security.Provider
 import java.security.Security
 import java.util.*
@@ -178,9 +182,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     }
 
+    private lateinit var spKeyStoreType: Spinner
+    private lateinit var spProviderType: Spinner
+    private lateinit var spClientList: Spinner
+
     private fun myInit() {
         // Тип контейнера.
-        val spKeyStoreType = findViewById<View>(R.id.spKeyStore) as Spinner
+        spKeyStoreType = findViewById(R.id.spKeyStore) as Spinner
 
         // Получение списка поддерживаемых типов хранилищ.
         val keyStoreTypeList: List<String> = KeyStoreType.keyStoreTypeList
@@ -202,7 +210,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 ///////////////////////////////////////////////////////////////////////////////////////
 
         // Тип провайдера.
-        val spProviderType = findViewById<View>(R.id.spProviderType) as Spinner
+        spProviderType = findViewById(R.id.spProviderType) as Spinner
 
         // Создаем ArrayAdapter для использования строкового массива
         // и способа отображения объекта.
@@ -221,7 +229,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 ///////////////////////////////////////////////////////////////////////////////////////
 
         // Список клиентских алиасов.
-        val spClientList = findViewById<View>(R.id.spExamplesClientList) as Spinner
+        spClientList = findViewById(R.id.spExamplesClientList) as Spinner
 
         val containerAliasAdapter = ArrayAdapter<String>(
             this, android.R.layout.simple_spinner_item
@@ -239,11 +247,154 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         myLoadClientList(containerAliasAdapter)
 ///////////////////////////////////////////////////////////////////////////////////////
-        val btnRefresh = findViewById<Button>(R.id.btnRefresh) as Button
+        val btnRefresh = findViewById(R.id.btnRefresh) as Button
         btnRefresh.setOnClickListener {
             myLoadClientList(containerAliasAdapter)
         }
 
+        val btnSign = findViewById(R.id.btnSign) as Button
+        btnSign.setOnClickListener {
+            doSign()
+        }
+
+    }
+
+    private val EXAMPLE_PACKAGE = "com.example.androidsignongdemo.client.example."
+    private fun doSign() {
+
+        val exampleClassName = "VerifyExample"
+
+
+        // Поиск примера.
+        val fullExampleClassName: String = EXAMPLE_PACKAGE + exampleClassName
+        val exampleClass = Class.forName(fullExampleClassName)
+
+        try {
+            val exampleConstructor = exampleClass.getConstructor(
+                ContainerAdapter::class.java
+            )
+
+            // Сборка универсального ContainerAdapter.
+
+            // Клиентский контейнер (подписант, отправитель, TLS).
+
+            // Сборка универсального ContainerAdapter.
+
+            // Клиентский контейнер (подписант, отправитель, TLS).
+            // CharSequence clientPasswordSequence = etClientPin.getText();
+            // char[] clientPassword = null;
+            //
+            // if (clientPasswordSequence != null) {
+            //     clientPassword = clientPasswordSequence.toString().toCharArray();
+            // } // if
+
+            // Контейнер получателя.
+            // CharSequence clientPasswordSequence = etClientPin.getText();
+            // char[] clientPassword = null;
+            //
+            // if (clientPasswordSequence != null) {
+            //     clientPassword = clientPasswordSequence.toString().toCharArray();
+            // } // if
+
+            // Контейнер получателя.
+
+            // Настройки примера.
+
+
+            // Настройки примера.
+            val adapter = ContainerAdapter(
+                this,
+                spClientList.getSelectedItem() as String,  /*clientPassword*/
+                null,
+                null, //spServerList.getSelectedItem() as String,
+                null
+            )
+
+            adapter.providerType =ProviderType.currentProviderType()
+            adapter.resources = resources // для примера установки сертификатов
+
+
+            // По наличию в списке ниже данного примера определяем,
+            // включена ли аутентификация. Только для TLS примеров!
+
+
+            // По наличию в списке ниже данного примера определяем,
+            // включена ли аутентификация. Только для TLS примеров!
+            val clientAuth = false
+            //val clientAuth = Arrays.asList<String>(*examplesRequireWrittenPin)
+              //  .contains(exampleClassName) // для TLS примеров
+
+
+            // Используется общее для всех хранилище корневых
+            // сертификатов cacerts.
+
+
+            // Используется общее для всех хранилище корневых
+            // сертификатов cacerts.
+            val trustStorePath: String = this.applicationInfo.dataDir +
+                    File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator +
+                    BKSTrustStore.STORAGE_FILE_TRUST
+
+            Logger.log("Example trust store: $trustStorePath")
+
+            adapter.trustStoreProvider = BouncyCastleProvider.PROVIDER_NAME
+            adapter.trustStoreType = BKSTrustStore.STORAGE_TYPE
+
+            adapter.trustStoreStream = FileInputStream(trustStorePath)
+            adapter.trustStorePassword = BKSTrustStore.STORAGE_PASSWORD
+
+            // Настройки для подключения к удаленному хосту в зависимости
+            // от алгоритма (чтобы охватить по возможности все алгоритмы)
+            // для TLS примеров, примера построения цепочки и т.п.
+
+            when (adapter.providerType) {
+                AlgorithmSelector.DefaultProviderType.pt2001 -> {
+
+
+                    // Для TLS примеров.
+                    if (clientAuth) {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2001ClientAuth)
+                    } // if
+                    else {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2001NoAuth)
+                    } // else
+                }
+                AlgorithmSelector.DefaultProviderType.pt2012Short -> {
+
+
+                    // Для TLS примеров.
+                    if (clientAuth) {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2012256ClientAuth)
+                    } // if
+                    else {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2012256NoAuth)
+                    } // else
+                }
+                AlgorithmSelector.DefaultProviderType.pt2012Long -> {
+
+
+                    // Для TLS примеров.
+                    if (clientAuth) {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2012512ClientAuth)
+                    } // if
+                    else {
+                        adapter.setConnectionInfo(RemoteConnectionInfo.host2012512NoAuth)
+                    } // else
+                }
+            }
+
+            // Выполнение примера.
+
+
+            // Выполнение примера.
+            val exampleImpl: HashData = exampleConstructor.newInstance(adapter) as HashData
+            exampleImpl.getResult(null)
+
+        } catch (e: Exception) {
+            Logger.log(e.message!!)
+            Logger.setStatusFailed()
+            Log.e(Constants.APP_LOGGER_TAG, e.message, e)
+        }
     }
 
 
@@ -424,7 +575,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 //                updateFragment(MainActivity.TAB_UTILITIES)
 
                 containerAliasAdapter.clear()
-                containerAliasAdapter.addAll(cacheAllAliases)
+                containerAliasAdapter.addAll(cacheAllAliases + cacheHDAliases)
                 containerAliasAdapter.notifyDataSetChanged()
             }
         }

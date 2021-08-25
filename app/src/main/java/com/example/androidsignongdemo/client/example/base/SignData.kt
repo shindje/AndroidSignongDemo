@@ -161,8 +161,17 @@ abstract class SignData protected constructor(adapter: ContainerAdapter, signAtt
         val keyStore = KeyStore.getInstance(storeType, JCSP.PROVIDER_NAME)
         keyStore.load(null, null)
         if (askPinInWindow) {
-            privateKey = keyStore.getKey(alias, password) as PrivateKey
-            certificate = keyStore.getCertificate(alias) as X509Certificate
+            val getKey = keyStore.getKey(alias, password)
+            if (getKey != null)
+                privateKey = getKey as PrivateKey
+            else
+                privateKey = null
+
+            val getCertificate = keyStore.getCertificate(alias)
+            if (getCertificate != null)
+                certificate = getCertificate as X509Certificate
+            else
+                certificate = null
         } // if
         else {
             val protectedParam = JCPProtectionParameter(
