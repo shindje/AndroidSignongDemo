@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SettingsKeyStoreType"
+        android:id="@+id/tvSettingKeyStore"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:layout_gravity="top|center_horizontal"/>
+
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,12 +24,44 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/SettingsProviderType"
+        android:id="@+id/tvSettingProviderStore"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="5dp"/>
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spProviderType"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ExamplesClientName"
+        android:id="@+id/tvExamplesClientName"
+        android:layout_gravity="top|center_horizontal"
+        />
+
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/spExamplesClientList"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginBottom="10dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh"
+        android:id="@+id/btnRefresh"
         />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

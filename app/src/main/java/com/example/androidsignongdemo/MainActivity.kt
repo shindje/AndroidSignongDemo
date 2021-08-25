@@ -34,7 +34,7 @@ import java.security.Security
 import java.util.*
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     // Номера вкладок.
 
@@ -183,12 +183,7 @@ class MainActivity : AppCompatActivity() {
         val spKeyStoreType = findViewById<View>(R.id.spKeyStore) as Spinner
 
         // Получение списка поддерживаемых типов хранилищ.
-
-        // Получение списка поддерживаемых типов хранилищ.
         val keyStoreTypeList: List<String> = KeyStoreType.keyStoreTypeList
-
-        // Создаем ArrayAdapter для использования строкового массива
-        // и способа отображения объекта.
 
         // Создаем ArrayAdapter для использования строкового массива
         // и способа отображения объекта.
@@ -198,16 +193,32 @@ class MainActivity : AppCompatActivity() {
         )
 
         // Способ отображения.
-
-        // Способ отображения.
         keyStoreTypeAdapter.setDropDownViewResource(
             android.R.layout.simple_spinner_dropdown_item
         )
 
         spKeyStoreType.adapter = keyStoreTypeAdapter
+        spKeyStoreType.onItemSelectedListener = this
+///////////////////////////////////////////////////////////////////////////////////////
 
+        // Тип провайдера.
+        val spProviderType = findViewById<View>(R.id.spProviderType) as Spinner
 
+        // Создаем ArrayAdapter для использования строкового массива
+        // и способа отображения объекта.
+        val providerTypeAdapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.providerTypes, android.R.layout.simple_spinner_item
+        )
 
+        // Способ отображения.
+        providerTypeAdapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        spProviderType.adapter = providerTypeAdapter
+        spProviderType.onItemSelectedListener = this
+///////////////////////////////////////////////////////////////////////////////////////
 
         // Список клиентских алиасов.
         val spClientList = findViewById<View>(R.id.spExamplesClientList) as Spinner
@@ -226,6 +237,17 @@ class MainActivity : AppCompatActivity() {
 
         spClientList.adapter = containerAliasAdapter
 
+        myLoadClientList(containerAliasAdapter)
+///////////////////////////////////////////////////////////////////////////////////////
+        val btnRefresh = findViewById<Button>(R.id.btnRefresh) as Button
+        btnRefresh.setOnClickListener {
+            myLoadClientList(containerAliasAdapter)
+        }
+
+    }
+
+
+    private fun myLoadClientList(containerAliasAdapter: ArrayAdapter<String>) {
         val containerManager =
             AsyncTaskManager(this, ContainerListener(containerAliasAdapter))
         containerManager.handleRetainedTask(lastCustomNonConfigurationInstance) // восстанавливаем задачу
@@ -239,6 +261,48 @@ class MainActivity : AppCompatActivity() {
         } // else
 
     }
+
+    /**
+     * Номер выбранного типа хранилища в списке.
+     */
+    private var keyStoreTypeIndex = 0
+
+    /**
+     * Номер выбранного типа провайдера в списке.
+     */
+    private var providerTypeIndex = 0
+
+    /**
+     * Флаг, сообщающий что настройки изменились
+     * (тип хранилища, алгоритм ключа, копирование
+     * контейнера). Если true, то нужно сказать обновить
+     * список контейнеров в примерах, когда придет запрос
+     * от MainActivity.
+     */
+    private var settingsChanged = false
+
+    override fun onItemSelected(adapterView: AdapterView<*>, view: View?, i: Int, l: Long) {
+        when (adapterView.id) {
+            R.id.spKeyStore -> {
+                if (keyStoreTypeIndex != i) {
+                    val keyStoreType = adapterView.getItemAtPosition(i) as String
+                    KeyStoreType.saveCurrentType(keyStoreType)
+                    keyStoreTypeIndex = i
+                    settingsChanged = true // настройка изменилась
+                } // if
+            }
+            R.id.spProviderType -> {
+                if (providerTypeIndex != i) {
+                    val provType = adapterView.getItemAtPosition(i) as String
+                    ProviderType.saveCurrentType(provType)
+                    providerTypeIndex = i
+                    settingsChanged = true // настройка изменилась
+                } // if
+            }
+        }
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {}
 
 
     /**
