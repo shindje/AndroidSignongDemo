@@ -6,17 +6,11 @@ import android.app.ActionBar
 import android.app.FragmentTransaction
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
-import com.example.androidsignongdemo.client.example.base.EncryptDecryptData
 import com.example.androidsignongdemo.util.*
 import org.apache.xml.security.utils.resolver.ResourceResolver
 import ru.CryptoPro.AdES.AdESConfig
@@ -62,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Менеджер контейнеров.
      */
-    private val containerManager: AsyncTaskManager? = null
+    private var containerManager: AsyncTaskManager? = null
 
     /**
      * Менеджер вкладок.
@@ -180,7 +174,72 @@ class MainActivity : AppCompatActivity() {
             PermissionHelper.PERMISSION_REQUEST_CODE_WRITE_STORAGE
         )
 
+        myInit()
+
     }
+
+    private fun myInit() {
+        // Тип контейнера.
+        val spKeyStoreType = findViewById<View>(R.id.spKeyStore) as Spinner
+
+        // Получение списка поддерживаемых типов хранилищ.
+
+        // Получение списка поддерживаемых типов хранилищ.
+        val keyStoreTypeList: List<String> = KeyStoreType.keyStoreTypeList
+
+        // Создаем ArrayAdapter для использования строкового массива
+        // и способа отображения объекта.
+
+        // Создаем ArrayAdapter для использования строкового массива
+        // и способа отображения объекта.
+        val keyStoreTypeAdapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_item,
+            keyStoreTypeList
+        )
+
+        // Способ отображения.
+
+        // Способ отображения.
+        keyStoreTypeAdapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        spKeyStoreType.adapter = keyStoreTypeAdapter
+
+
+
+
+        // Список клиентских алиасов.
+        val spClientList = findViewById<View>(R.id.spExamplesClientList) as Spinner
+
+        val containerAliasAdapter = ArrayAdapter<String>(
+            this, android.R.layout.simple_spinner_item
+        )
+
+        // Способ отображения.
+
+
+        // Способ отображения.
+        containerAliasAdapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        spClientList.adapter = containerAliasAdapter
+
+        val containerManager =
+            AsyncTaskManager(this, ContainerListener(containerAliasAdapter))
+        containerManager.handleRetainedTask(lastCustomNonConfigurationInstance) // восстанавливаем задачу
+
+
+        if (!containerManager.isWorking()) { // если нет - запускаем задачу
+            containerManager.setupTask(ContainerTask())
+        } // if
+        else {
+            AppUtils.alertToast(this, getString(R.string.PBMessageAlreadyRunning))
+        } // else
+
+    }
+
 
     /**
      * Обновление списка контейнеров во вкладках.
@@ -278,7 +337,7 @@ class MainActivity : AppCompatActivity() {
      * Реакция на обновление.
      *
      */
-    inner class ContainerListener : OnTaskCompleteListener {
+    inner class ContainerListener(val containerAliasAdapter: ArrayAdapter<String>) : OnTaskCompleteListener {
         override fun onTaskComplete(task: Task) {
             if (task.isCancelled) {
                 Log.d(Constants.APP_LOGGER_TAG, "Task cancelled.")
@@ -299,6 +358,10 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.cacheHDAliases.addAll(task.hdAliases)
 //                updateFragment(MainActivity.TAB_EXAMPLES)
 //                updateFragment(MainActivity.TAB_UTILITIES)
+
+                containerAliasAdapter.clear()
+                containerAliasAdapter.addAll(cacheAllAliases)
+                containerAliasAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -324,7 +387,7 @@ class MainActivity : AppCompatActivity() {
 
         // Сохраняем задачу.
         return if (containerManager != null) {
-            containerManager.retainTask()
+            containerManager!!.retainTask()
         } else null // if
     }
 

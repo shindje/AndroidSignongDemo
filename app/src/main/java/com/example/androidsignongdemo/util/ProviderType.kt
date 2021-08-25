@@ -72,14 +72,14 @@ private constructor(context: Context) :
          *
          * @return Тип провайдера.
          */
-        fun currentProviderType(): DefaultProviderType {
+        fun currentProviderType(): DefaultProviderType? {
             if (!initiated) {
                 return DefaultProviderType.pt2001
             } // if
             val `val` = currentType()
-            val providerTypesList = Arrays.asList<Any>(providerType_?.resourceAvailableValues)
-            val position = providerTypesList.indexOf(`val`)
-            return AlgorithmSelector.find(position)
+            val providerTypesList = providerType_?.resourceAvailableValues?.toList()
+            val position = providerTypesList?.indexOf(`val`)
+            return position?.let { AlgorithmSelector.find(it) }
         }
 
         /**

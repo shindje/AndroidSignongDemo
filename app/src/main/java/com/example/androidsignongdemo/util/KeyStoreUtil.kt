@@ -47,7 +47,7 @@ object KeyStoreUtil {
      */
     fun aliases(
         storeType: String?,
-        providerType: DefaultProviderType
+        providerType: DefaultProviderType?
     ): List<String> {
         val aliasesList: MutableList<String> = ArrayList()
         try {
