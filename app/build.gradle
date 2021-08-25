@@ -1,0 +1,146 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    if (file("../internal/android/key/key.store").exists()) {
+        signingConfigs {
+            release {
+                storeFile file('../internal/android/key/key.store')
+                keyAlias = 'cprocsp_android'
+                storePassword 'CryptoPro'
+                keyPassword 'CryptoPro'
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.example.androidsignongdemo"
+        minSdkVersion 24
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+        signingConfig signingConfigs.debug
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/Digest.CP'
+        exclude 'META-INF/Sign.CP'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+configurations {
+    externalLibs
+}
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.60'
+    implementation 'commons-logging:commons-logging:1.2'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.0'
+    implementation 'org.apache.httpcomponents.core5:httpcore5:5.0'
+    implementation 'org.ini4j:ini4j:0.5.1'
+    compileOnly 'org.json:json:20180813'
+    compileOnly 'xalan:serializer:2.7.2'
+    compileOnly 'xalan:xalan:2.7.2'
+    implementation 'commons-codec:commons-codec:1.14'
+    implementation 'org.apache.santuario:xmlsec:1.4.4'
+    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
+
+    if (findProject(':JInitCSP') != null) {
+        externalLibs implementation('ru.aladdin:jcpcsclite:1.1.0.45')
+        externalLibs implementation('ru.rutoken:rtserviceconnection:1.0.3')
+        externalLibs implementation('com.objsys:asn1rt:5.74.0')
+        externalLibs implementation('ru.crypto:samples:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:AdES-core:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:ASN1P:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:CAdESAPI:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:cpSSL:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCP:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCPRequest:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCPRevCheck:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCPRevTools:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCPxml:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:JCSP-android:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:XAdESAPI:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        externalLibs implementation('ru.crypto:XMLDSigRI:2.0' + rootProject.ext.revision){
+            transitive=false
+        }
+        implementation(project(path: ':JInitCSP')) {
+            transitive=false
+        }
+        externalLibs(project(path: ':JInitCSP', configuration: 'default')){
+            transitive=false
+        }
+    }
+    else {
+        implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    }
+
+}
+
+task copySharedLibrary(type: Copy) {
+    from configurations.externalLibs
+    into "libs"
+}
