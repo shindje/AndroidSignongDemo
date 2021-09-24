@@ -254,16 +254,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         val btnSign = findViewById(R.id.btnSign) as Button
         btnSign.setOnClickListener {
-            doSign()
+            doExample("VerifyExample")
         }
 
+        val btnTls = findViewById<Button>(R.id.btnTls)
+        btnTls.setOnClickListener {
+            doExample("OkHttpSimpleExample")
+        }
     }
 
     private val EXAMPLE_PACKAGE = "com.example.androidsignongdemo.client.example."
-    private fun doSign() {
-
-        val exampleClassName = "VerifyExample"
-
+    private fun doExample(exampleClassName: String) {
 
         // Поиск примера.
         val fullExampleClassName: String = EXAMPLE_PACKAGE + exampleClassName

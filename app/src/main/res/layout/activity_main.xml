@@ -71,6 +71,14 @@
         android:id="@+id/btnSign"
         />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OkHttp TLS"
+        android:id="@+id/btnTls"
+        />
+
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/llSubTop"
         android:layout_width="match_parent"
